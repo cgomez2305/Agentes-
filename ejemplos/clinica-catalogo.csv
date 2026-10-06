@@ -1,0 +1,6 @@
+sku,nombre,precio,descripcion,duracion_min,tipo
+VAL-01,Valoración inicial,60000,Revisión general y plan de tratamiento,30,servicio
+LIM-01,Limpieza dental profunda,150000,Profilaxis y detartraje,45,servicio
+BLA-01,Blanqueamiento dental en consultorio,650000,Una sesión con lámpara LED,90,servicio
+ORT-01,Ortodoncia con brackets metálicos,3200000,Tratamiento completo; cuota inicial más cuotas mensuales,,servicio
+RES-01,Resina dental,180000,Por superficie,40,servicio
