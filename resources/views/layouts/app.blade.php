@@ -19,6 +19,7 @@
         <nav class="topnav" aria-label="Principal">
             <a href="{{ route('inbox') }}" @class(['active' => request()->routeIs('inbox')])>Bandeja</a>
             <a href="{{ route('agenda') }}" @class(['active' => request()->routeIs('agenda*')])>Agenda</a>
+            <a href="{{ route('contacts') }}" @class(['active' => request()->routeIs('contacts')])>Contactos</a>
             <a href="{{ route('metrics') }}" @class(['active' => request()->routeIs('metrics')])>Métricas</a>
             <a href="{{ route('settings.agent') }}" @class(['active' => request()->routeIs('settings.*')])>Configuración</a>
         </nav>
