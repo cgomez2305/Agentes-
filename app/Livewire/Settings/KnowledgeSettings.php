@@ -6,6 +6,7 @@ use App\Livewire\Concerns\ScopedToTenant;
 use App\Models\CatalogItem;
 use App\Models\KnowledgeSource;
 use App\Services\Onboarding\CatalogImporter;
+use App\Services\Onboarding\DocumentExtractor;
 use App\Services\Onboarding\TenantProvisioner;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
@@ -20,6 +21,13 @@ class KnowledgeSettings extends Component
     use ScopedToTenant, WithFileUploads;
 
     public bool $showSourceForm = false;
+
+    /** texto, pdf o url */
+    public string $sourceMode = 'texto';
+
+    public $pdf;
+
+    public string $url = '';
 
     public string $sourceTitle = '';
 
@@ -36,7 +44,31 @@ class KnowledgeSettings extends Component
 
     public ?string $error = null;
 
-    public function addSource(TenantProvisioner $provisioner): void
+    public function addSource(TenantProvisioner $provisioner, DocumentExtractor $extractor): void
+    {
+        $this->error = null;
+
+        try {
+            [$type, $title, $content, $origin] = match ($this->sourceMode) {
+                'pdf' => $this->pdfSource($extractor),
+                'url' => $this->urlSource($extractor),
+                default => $this->textSource(),
+            };
+        } catch (InvalidArgumentException $e) {
+            $this->addError($this->sourceMode === 'pdf' ? 'pdf' : ($this->sourceMode === 'url' ? 'url' : 'sourceContent'), $e->getMessage());
+
+            return;
+        }
+
+        $source = $provisioner->addKnowledge($this->tenant(), $title, $content, $type, $origin);
+        $this->reset('sourceTitle', 'sourceContent', 'showSourceForm', 'pdf', 'url', 'sourceMode');
+        $this->flash("\"{$source->title}\" agregado en {$source->chunks()->count()} fragmentos.");
+    }
+
+    /**
+     * @return array{0: string, 1: string, 2: string, 3: ?string}
+     */
+    private function textSource(): array
     {
         $this->validate([
             'sourceTitle' => ['required', 'string', 'max:120'],
@@ -47,9 +79,37 @@ class KnowledgeSettings extends Component
             'sourceContent.min' => 'El texto es muy corto para ser útil.',
         ]);
 
-        $source = $provisioner->addKnowledge($this->tenant(), trim($this->sourceTitle), $this->sourceContent);
-        $this->reset('sourceTitle', 'sourceContent', 'showSourceForm');
-        $this->flash("\"{$source->title}\" agregado en {$source->chunks()->count()} fragmentos.");
+        return ['text', trim($this->sourceTitle), $this->sourceContent, null];
+    }
+
+    /**
+     * @return array{0: string, 1: string, 2: string, 3: ?string}
+     */
+    private function pdfSource(DocumentExtractor $extractor): array
+    {
+        $this->validate(['pdf' => ['required', 'file', 'mimes:pdf', 'max:10240']], [
+            'pdf.required' => 'Elige un PDF.',
+            'pdf.mimes' => 'El archivo debe ser PDF.',
+            'pdf.max' => 'El PDF no puede pasar de 10 MB.',
+        ]);
+
+        $name = $this->pdf->getClientOriginalName();
+        $title = trim($this->sourceTitle) ?: pathinfo($name, PATHINFO_FILENAME);
+
+        return ['pdf', mb_substr($title, 0, 120), $extractor->fromPdf($this->pdf->getRealPath()), $name];
+    }
+
+    /**
+     * @return array{0: string, 1: string, 2: string, 3: ?string}
+     */
+    private function urlSource(DocumentExtractor $extractor): array
+    {
+        $this->validate(['url' => ['required', 'string', 'max:500']], ['url.required' => 'Escribe la dirección de la página.']);
+        $url = trim($this->url);
+        $url = preg_match('#^https?://#i', $url) ? $url : 'https://'.$url;
+        $page = $extractor->fromUrl($url);
+
+        return ['url', trim($this->sourceTitle) ?: $page['title'], $page['text'], $url];
     }
 
     public function deleteSource(int $id): void

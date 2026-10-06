@@ -49,6 +49,7 @@ class SettingsTest extends TestCase
         Livewire::actingAs($this->user)->test(AgentSettings::class)
             ->set('name', 'Mateo')
             ->set('mode', Agent::MODE_SUGGEST)
+            ->assertSeeHtml('aria-current="page"')
             ->set('fields', [['key' => '', 'question' => 'Presupuesto aproximado'], ['key' => 'ciudad', 'question' => 'Ciudad']])
             ->set('quickReplies', [['keywords' => ' parqueadero ,  parqueo ', 'reply' => 'Sí, en el sótano.']])
             ->call('save')

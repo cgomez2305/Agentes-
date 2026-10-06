@@ -5,7 +5,7 @@
             <p>Los datos que el agente usa para responder sobre tu negocio.</p>
         </div>
     </header>
-    @include('livewire.settings._nav')
+    @include('livewire.settings._nav', ['section' => 'business'])
 
     <form class="settings-form narrow" wire:submit="save">
         @if ($notice)

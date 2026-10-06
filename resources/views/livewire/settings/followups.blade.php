@@ -8,7 +8,7 @@
             <p>Mensajes que el agente envía por su cuenta para no perder clientes.</p>
         </div>
     </header>
-    @include('livewire.settings._nav')
+    @include('livewire.settings._nav', ['section' => 'followups'])
 
     <div class="settings-columns">
         <form class="settings-form" wire:submit="save">

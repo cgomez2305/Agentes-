@@ -5,7 +5,7 @@
             <p>Cómo habla, qué pregunta y qué responde tu agente.</p>
         </div>
     </header>
-    @include('livewire.settings._nav')
+    @include('livewire.settings._nav', ['section' => 'agent'])
 
     @php
         $steps = $this->onboarding;

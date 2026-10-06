@@ -28,7 +28,7 @@ El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 | Seguimientos | `app/Services/FollowUp/FollowUpService.php`, `php artisan agentes:seguimientos` | Un mensaje a quien dejó de responder (dentro de la ventana de 24 h, de 8 a. m. a 8 p. m.) y recordatorio de cita el día anterior, con plantilla aprobada si la ventana está cerrada |
 | Registro web | `app/Http/Controllers/Auth/RegisterController.php` | Un negocio se registra en `/registro`, elige su tipo (clínica, inmobiliaria, tienda), recibe el agente con la plantilla y una guía de primeros pasos |
 | Contactos (CRM) | `app/Livewire/Contacts.php` | Embudo por etapa, búsqueda, etiquetas, notas del equipo, historial de conversaciones y citas, exportación CSV para Excel |
-| Configuración web | `app/Livewire/Settings/` | Agente (instrucciones, tono, modo, modelo, datos a pedir, respuestas rápidas), negocio (datos y horario), conocimiento y catálogo (con importación CSV) y seguimientos; incluye un chat de prueba que no aparece en la bandeja ni en las métricas |
+| Configuración web | `app/Livewire/Settings/` | Agente (instrucciones, tono, modo, modelo, datos a pedir, respuestas rápidas), negocio (datos y horario), conocimiento (texto, PDF o página web, con bloqueo de direcciones internas) y catálogo (con importación CSV) y seguimientos; incluye un chat de prueba que no aparece en la bandeja ni en las métricas |
 | Agenda | `app/Services/Booking/`, `app/Services/Agent/BookingTools.php`, `app/Livewire/Agenda.php` | El agente consulta horarios libres, agenda y cancela; vista semanal, citas manuales, reglas por negocio y sincronización opcional con Google Calendar |
 
 ### Cómo se abarata la operación (ya implementado)
@@ -72,7 +72,7 @@ Entra a `http://localhost:8000` con `demo@agentes.test` / `demo12345`. La demo n
 
 # Negocio de ejemplo con datos de prueba
 php artisan agentes:negocio "Mi Clínica" --vertical=clinica --direccion="Calle 10 # 43-20, Medellín"
-php artisan agentes:conocimiento mi-clinica ejemplos/clinica-conocimiento.md
+php artisan agentes:conocimiento mi-clinica ejemplos/clinica-conocimiento.md   # también acepta .pdf o una URL https://
 php artisan agentes:catalogo mi-clinica ejemplos/clinica-catalogo.csv
 php artisan agentes:usuario mi-clinica tu@correo.com --nombre="Tu Nombre"
 
@@ -134,8 +134,7 @@ Corren cada 5 minutos con el programador de Laravel. En el servidor agrega el cr
 
 Fase 2 (producto vendible), lo que falta:
 
-1. Carga de conocimiento desde PDF o desde la URL del sitio web.
-2. Cobro de suscripciones (Wompi y Stripe) y límites por plan.
+1. Cobro de suscripciones (Wompi y Stripe) y límites por plan.
 
 Fase 3 (diferenciadores): plugin de WooCommerce, links de pago (Wompi/Bold), Embedded Signup de Meta y búsqueda semántica con pgvector.
 

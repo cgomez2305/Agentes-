@@ -5,7 +5,7 @@
             <p>Lo que el agente sabe de tu negocio y lo que vendes.</p>
         </div>
     </header>
-    @include('livewire.settings._nav')
+    @include('livewire.settings._nav', ['section' => 'knowledge'])
 
     @if ($notice)
         <p class="flash" role="status">{{ $notice }}</p>
@@ -28,15 +28,38 @@
 
             @if ($showSourceForm)
                 <form class="form inline-form" wire:submit="addSource">
-                    <label for="src-title">Título</label>
-                    <input id="src-title" type="text" wire:model="sourceTitle" placeholder="Políticas de cancelación">
+                    <div class="segmented" role="group" aria-label="Tipo de fuente">
+                        @foreach (['texto' => 'Pegar texto', 'pdf' => 'Subir PDF', 'url' => 'Página web'] as $mode => $label)
+                            <button type="button" wire:click="$set('sourceMode', '{{ $mode }}')" @class(['active' => $sourceMode === $mode])>{{ $label }}</button>
+                        @endforeach
+                    </div>
+
+                    <label for="src-title">Título{{ $sourceMode === 'texto' ? '' : ' (opcional)' }}</label>
+                    <input id="src-title" type="text" wire:model="sourceTitle" placeholder="{{ $sourceMode === 'url' ? 'Se toma el título de la página' : 'Políticas de cancelación' }}">
                     @error('sourceTitle') <p class="form-error">{{ $message }}</p> @enderror
-                    <label for="src-content">Texto</label>
-                    <textarea id="src-content" rows="8" wire:model="sourceContent" placeholder="Pega aquí el texto. Separa los temas con una línea en blanco."></textarea>
-                    @error('sourceContent') <p class="form-error">{{ $message }}</p> @enderror
+
+                    @if ($sourceMode === 'pdf')
+                        <label for="src-pdf">Archivo PDF</label>
+                        <input id="src-pdf" type="file" accept="application/pdf" wire:model="pdf">
+                        <p class="hint">Brochures, listas de precios, reglamentos. Debe tener texto seleccionable (no fotos escaneadas). Máximo 10 MB.</p>
+                        @error('pdf') <p class="form-error">{{ $message }}</p> @enderror
+                    @elseif ($sourceMode === 'url')
+                        <label for="src-url">Dirección de la página</label>
+                        <input id="src-url" type="text" inputmode="url" wire:model="url" placeholder="https://tunegocio.com/preguntas-frecuentes">
+                        <p class="hint">Se lee el texto principal de la página, sin menús ni pie de página. Agrega una página por tema.</p>
+                        @error('url') <p class="form-error">{{ $message }}</p> @enderror
+                    @else
+                        <label for="src-content">Texto</label>
+                        <textarea id="src-content" rows="8" wire:model="sourceContent" placeholder="Pega aquí el texto. Separa los temas con una línea en blanco."></textarea>
+                        @error('sourceContent') <p class="form-error">{{ $message }}</p> @enderror
+                    @endif
+
                     <div class="inline-actions">
                         <button type="button" class="btn ghost" wire:click="$set('showSourceForm', false)">Cancelar</button>
-                        <button type="submit" class="btn primary">Guardar</button>
+                        <button type="submit" class="btn primary" wire:loading.attr="disabled" wire:target="addSource,pdf">
+                            <span wire:loading.remove wire:target="addSource">Agregar</span>
+                            <span wire:loading wire:target="addSource">Leyendo…</span>
+                        </button>
                     </div>
                 </form>
             @endif
@@ -44,10 +67,10 @@
             <ul class="source-list" role="list">
                 @forelse ($this->sources as $source)
                     <li wire:key="src-{{ $source->id }}">
-                        <span class="source-icon" aria-hidden="true">¶</span>
+                        <span class="source-icon" aria-hidden="true">{{ ['pdf' => 'PDF', 'url' => 'www'][$source->type] ?? '¶' }}</span>
                         <span class="source-body">
                             <strong>{{ $source->title }}</strong>
-                            <span>{{ $source->chunks_count }} {{ $source->chunks_count === 1 ? 'fragmento' : 'fragmentos' }} · {{ $source->created_at->locale('es')->diffForHumans() }}</span>
+                            <span>{{ $source->chunks_count }} {{ $source->chunks_count === 1 ? 'fragmento' : 'fragmentos' }} · {{ $source->created_at->locale('es')->diffForHumans() }}@if ($source->type === 'url') · {{ parse_url($source->origin, PHP_URL_HOST) }}@endif</span>
                         </span>
                         <button type="button" class="mini quiet" wire:click="deleteSource({{ $source->id }})" wire:confirm="¿Eliminar «{{ $source->title }}»?">Eliminar</button>
                     </li>
@@ -103,7 +126,7 @@
                                     {{ $catalogItem->name }}
                                     @unless ($catalogItem->is_available) <span class="chip status-closed">No disponible</span> @endunless
                                 </th>
-                                <td>{{ $catalogItem->formattedPrice() ?? 'A cotizar' }}</td>
+                                <td class="nowrap">{{ $catalogItem->formattedPrice() ?? 'A cotizar' }}</td>
                                 <td>{{ $catalogItem->duration_minutes ? $catalogItem->duration_minutes.' min' : '—' }}</td>
                                 <td class="row-actions">
                                     <button type="button" class="mini" wire:click="editItem({{ $catalogItem->id }})">Editar</button>
