@@ -11,13 +11,32 @@ class Tenant extends Model
 {
     protected $fillable = [
         'name', 'slug', 'vertical', 'plan', 'monthly_conversation_limit',
-        'timezone', 'locale', 'business_hours', 'profile',
+        'timezone', 'locale', 'business_hours', 'booking_settings', 'profile',
+    ];
+
+    /** Mismos valores por defecto que la base de datos, para que existan antes de recargar el modelo. */
+    protected $attributes = [
+        'plan' => 'prueba',
+        'monthly_conversation_limit' => 500,
+        'timezone' => 'America/Bogota',
+        'locale' => 'es_CO',
+    ];
+
+    /** Valores por defecto de la agenda; cada negocio puede sobrescribirlos. */
+    public const BOOKING_DEFAULTS = [
+        'enabled' => false,
+        'slot_minutes' => 30,
+        'default_duration' => 30,
+        'min_notice_hours' => 2,
+        'max_days_ahead' => 30,
+        'capacity' => 1,
     ];
 
     protected function casts(): array
     {
         return [
             'business_hours' => 'array',
+            'booking_settings' => 'array',
             'profile' => 'array',
             'monthly_conversation_limit' => 'integer',
         ];
@@ -31,6 +50,24 @@ class Tenant extends Model
     public function agent(): HasOne
     {
         return $this->hasOne(Agent::class)->where('is_active', true)->latestOfMany();
+    }
+
+    public function calendarConnection(): HasOne
+    {
+        return $this->hasOne(CalendarConnection::class);
+    }
+
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    /**
+     * Configuración de la agenda con los valores por defecto completados.
+     */
+    public function booking(string $key): mixed
+    {
+        return ($this->booking_settings ?? [])[$key] ?? self::BOOKING_DEFAULTS[$key];
     }
 
     public function users(): HasMany

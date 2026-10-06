@@ -260,6 +260,23 @@
                 </dl>
             </section>
 
+            @php $nextAppointment = $contact->appointments()->upcoming()->first(); @endphp
+            @if ($nextAppointment)
+                <section class="facts">
+                    <h3>Próxima cita</h3>
+                    <a class="next-appt" href="{{ route('agenda', ['semana' => $local($nextAppointment->starts_at)->startOfWeek()->format('Y-m-d')]) }}">
+                        <span class="next-appt-date">
+                            <b>{{ $local($nextAppointment->starts_at)->day }}</b>
+                            {{ $local($nextAppointment->starts_at)->locale('es')->isoFormat('MMM') }}
+                        </span>
+                        <span>
+                            <strong>{{ $nextAppointment->title }}</strong>
+                            {{ $local($nextAppointment->starts_at)->locale('es')->isoFormat('dddd, h:mm a') }}
+                        </span>
+                    </a>
+                </section>
+            @endif
+
             @if ($current->summary)
                 <section class="facts">
                     <h3>Resumen</h3>

@@ -6,6 +6,7 @@ use App\Models\Agent;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\UsageRecord;
+use App\Services\Booking\BookingService;
 use App\Services\Llm\LlmProvider;
 use App\Services\Llm\LlmRequest;
 use App\Services\Llm\LlmResult;
@@ -24,6 +25,7 @@ class AgentRuntime
         private readonly PromptBuilder $prompts,
         private readonly QuickReplies $quickReplies,
         private readonly OutputGuard $guard,
+        private readonly BookingService $booking,
     ) {}
 
     public function handle(Conversation $conversation): AgentReply
@@ -86,7 +88,7 @@ class AgentRuntime
     private function runAgent(Conversation $conversation, Agent $agent, string $incoming): AgentReply
     {
         $tenant = $conversation->tenant;
-        $tools = new AgentTools($conversation, $this->search);
+        $tools = new AgentTools($conversation, $this->search, new BookingTools($conversation, $this->booking, $this->search));
 
         // RAG acotado: los fragmentos más relevantes al mensaje entran directo
         // al contexto; si el modelo necesita más, usa buscar_conocimiento.

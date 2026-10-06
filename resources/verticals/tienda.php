@@ -20,6 +20,7 @@ return [
             ['keywords' => ['horario', 'horarios'], 'reply' => 'Te atendemos por aquí 24/7, y nuestro equipo está disponible {horario}. ¿Qué producto estás buscando?'],
         ],
     ],
+    'booking_settings' => ['enabled' => false],
     'business_hours' => [
         'mon' => ['09:00', '19:00'], 'tue' => ['09:00', '19:00'], 'wed' => ['09:00', '19:00'],
         'thu' => ['09:00', '19:00'], 'fri' => ['09:00', '19:00'], 'sat' => ['09:00', '14:00'],

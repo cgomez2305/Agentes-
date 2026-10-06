@@ -21,6 +21,7 @@ return [
             ['keywords' => ['direccion', 'sala de ventas', 'ubicacion'], 'reply' => 'Nuestra sala de ventas está en {direccion}. ¿Quieres que agendemos una visita?'],
         ],
     ],
+    'booking_settings' => ['enabled' => true, 'slot_minutes' => 60, 'default_duration' => 60, 'min_notice_hours' => 4, 'max_days_ahead' => 21, 'capacity' => 1],
     'business_hours' => [
         'mon' => ['08:00', '18:00'], 'tue' => ['08:00', '18:00'], 'wed' => ['08:00', '18:00'],
         'thu' => ['08:00', '18:00'], 'fri' => ['08:00', '18:00'], 'sat' => ['09:00', '16:00'], 'sun' => ['10:00', '15:00'],

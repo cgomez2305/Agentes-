@@ -45,6 +45,7 @@ class TenantProvisioner
                 'slug' => $this->uniqueSlug($name),
                 'vertical' => $vertical,
                 'business_hours' => $template['business_hours'] ?? null,
+                'booking_settings' => $template['booking_settings'] ?? null,
                 'profile' => $profile,
             ]);
 
@@ -55,7 +56,7 @@ class TenantProvisioner
                 Agent::create($agent);
             });
 
-            return $tenant;
+            return $tenant->fresh();
         });
     }
 

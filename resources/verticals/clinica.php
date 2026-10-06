@@ -22,6 +22,7 @@ return [
             ['keywords' => ['horario', 'horarios', 'a que hora abren'], 'reply' => 'Nuestro horario es {horario}. ¿Te ayudo a agendar una cita?'],
         ],
     ],
+    'booking_settings' => ['enabled' => true, 'slot_minutes' => 30, 'default_duration' => 30, 'min_notice_hours' => 2, 'max_days_ahead' => 30, 'capacity' => 1],
     'business_hours' => [
         'mon' => ['08:00', '18:00'], 'tue' => ['08:00', '18:00'], 'wed' => ['08:00', '18:00'],
         'thu' => ['08:00', '18:00'], 'fri' => ['08:00', '18:00'], 'sat' => ['08:00', '13:00'],

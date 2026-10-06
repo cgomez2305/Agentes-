@@ -18,6 +18,7 @@
         </a>
         <nav class="topnav" aria-label="Principal">
             <a href="{{ route('inbox') }}" @class(['active' => request()->routeIs('inbox')])>Bandeja</a>
+            <a href="{{ route('agenda') }}" @class(['active' => request()->routeIs('agenda*')])>Agenda</a>
         </nav>
         <form method="POST" action="{{ route('logout') }}" class="user">
             @csrf

@@ -51,6 +51,11 @@ class Contact extends Model
             ->implode('');
     }
 
+    public function appointments(): HasMany
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
     public function conversations(): HasMany
     {
         return $this->hasMany(Conversation::class);

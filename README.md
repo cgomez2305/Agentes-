@@ -24,6 +24,7 @@ El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 | Envío saliente | `app/Services/WhatsApp/OutboundSender.php` | Respeta la ventana de 24 h; una persona que responde toma la conversación |
 | Resumen automático | `app/Services/Agent/ConversationSummarizer.php` | Los mensajes que salen del contexto corto se resumen fuera del camino crítico |
 | Acceso | `app/Http/Controllers/Auth/LoginController.php` | Cada usuario ve solo las conversaciones de su negocio |
+| Agenda | `app/Services/Booking/`, `app/Services/Agent/BookingTools.php`, `app/Livewire/Agenda.php` | El agente consulta horarios libres, agenda y cancela; vista semanal, citas manuales, reglas por negocio y sincronización opcional con Google Calendar |
 
 ### Cómo se abarata la operación (ya implementado)
 
@@ -100,10 +101,22 @@ php artisan test
 
 Cubren: ingreso y aislamiento de la bandeja por negocio, filtro de atención, respuesta humana, ventana de 24 h, borradores, resumen automático, verificación y firma del webhook, flujo de punta a punta con envío a la Graph API, duplicados de Meta, debounce, reglas sin LLM, traspaso a humano, bloqueo de precios inventados, calificación del lead, recuperación de conocimiento, modo sugerir, aislamiento entre negocios y el formato de las peticiones a la API de Claude (bucle de herramientas, caché, fallback).
 
+## Agenda y Google Calendar
+
+La agenda funciona sin Google: las citas viven en la base de datos y la disponibilidad sale del horario de atención y las reglas de cada negocio (duración, intervalo, anticipación mínima, días hacia adelante y citas simultáneas). Se configuran en **Agenda → Configurar**.
+
+Para sincronizar con Google Calendar:
+
+1. En Google Cloud Console crea credenciales OAuth de tipo "Aplicación web" y habilita la Google Calendar API.
+2. Agrega como URI de redirección `https://TU-DOMINIO/agenda/google/callback`.
+3. Llena `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` en `.env`.
+4. Cada negocio conecta su calendario desde **Agenda → Configurar → Conectar Google Calendar**.
+
+Con el calendario conectado, sus eventos bloquean horarios para el agente y cada cita nueva se copia allá.
+
 ## Siguientes pasos (Fase 2: producto vendible)
 
-1. Agenda con Google Calendar (`consultar_disponibilidad`, `crear_cita`).
-2. Seguimientos automáticos dentro de la ventana de 24 h y con plantillas aprobadas fuera de ella.
+1. Seguimientos automáticos dentro de la ventana de 24 h y con plantillas aprobadas fuera de ella.
 3. Onboarding web: registro, datos del negocio, carga de PDF/URL y catálogo sin consola.
 4. Panel de métricas: conversaciones, leads calificados, citas, tiempo de respuesta y costo.
 5. CRM: lista de contactos con etapas y etiquetas.

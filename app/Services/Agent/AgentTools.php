@@ -19,6 +19,7 @@ class AgentTools
     public function __construct(
         private readonly Conversation $conversation,
         private readonly KnowledgeSearch $search,
+        private readonly ?BookingTools $booking = null,
     ) {}
 
     /**
@@ -28,7 +29,7 @@ class AgentTools
     {
         $fields = collect($this->conversation->agent?->qualification_fields ?? [])->pluck('key')->all();
 
-        return [
+        $core = [
             new ToolDefinition(
                 name: 'buscar_conocimiento',
                 description: 'Busca en la información del negocio (políticas, preguntas frecuentes, '
@@ -88,21 +89,31 @@ class AgentTools
                 ],
             ),
         ];
+
+        return $this->booking?->enabled() ? [...$core, ...$this->booking->definitions()] : $core;
     }
 
     public function execute(string $name, array $input): string
     {
-        $output = match ($name) {
+        $output = match (true) {
+            in_array($name, BookingTools::NAMES, true) && $this->booking?->enabled() => $this->booking->execute($name, $input),
+            default => $this->executeCore($name, $input),
+        };
+
+        $this->evidence .= "\n".$output;
+
+        return $output;
+    }
+
+    private function executeCore(string $name, array $input): string
+    {
+        return match ($name) {
             'buscar_conocimiento' => $this->searchKnowledge((string) ($input['consulta'] ?? '')),
             'consultar_catalogo' => $this->searchCatalog((string) ($input['consulta'] ?? '')),
             'guardar_dato_lead' => $this->saveLeadData((string) ($input['campo'] ?? ''), (string) ($input['valor'] ?? '')),
             'pasar_a_humano' => $this->handOff((string) ($input['motivo'] ?? 'Solicitado por el agente')),
             default => 'Herramienta desconocida.',
         };
-
-        $this->evidence .= "\n".$output;
-
-        return $output;
     }
 
     public function evidence(): string

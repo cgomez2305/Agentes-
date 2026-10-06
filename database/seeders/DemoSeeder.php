@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Agent;
+use App\Models\Appointment;
 use App\Models\CatalogItem;
 use App\Models\Contact;
 use App\Models\Conversation;
@@ -94,7 +95,49 @@ class DemoSeeder extends Seeder
             ], ['tratamiento' => 'blanqueamiento'], 'nuevo', null, $user);
         });
 
+        $tenants->run($tenant, fn () => $this->appointments($tenant));
+
         $this->command?->info('Demo lista: entra con demo@agentes.test / demo12345');
+    }
+
+    /**
+     * Citas de ejemplo repartidas en la semana actual y la siguiente.
+     */
+    private function appointments(Tenant $tenant): void
+    {
+        $monday = now($tenant->timezone)->startOfWeek()->toImmutable();
+        $service = fn (string $sku) => CatalogItem::where('sku', $sku)->first();
+        $contact = fn (string $waId) => Contact::where('wa_id', $waId)->first();
+        $extra = fn (string $waId, string $name) => Contact::firstOrCreate(['wa_id' => $waId], ['name' => $name, 'stage' => 'cliente']);
+
+        $plan = [
+            [0, '09:00', 'VAL-01', $extra('573015550101', 'Sofía Arango'), 'human', Appointment::COMPLETED, null],
+            [0, '15:30', 'LIM-01', $extra('573015550102', 'Diego Mejía'), 'agent', Appointment::NO_SHOW, null],
+            [1, '10:00', 'RES-01', $extra('573015550103', 'Valentina Ríos'), 'agent', Appointment::CONFIRMED, 'Molestia en un molar'],
+            [2, '08:30', 'BLA-01', $extra('573015550104', 'Camila Duque'), 'human', Appointment::CONFIRMED, null],
+            [3, '09:00', 'LIM-01', $contact('573001112233'), 'agent', Appointment::CONFIRMED, 'Agendó por WhatsApp; primera vez'],
+            [3, '11:00', 'VAL-01', $extra('573015550105', 'Tomás Gil'), 'agent', Appointment::CONFIRMED, 'Interesado en ortodoncia'],
+            [4, '14:00', 'LIM-01', $extra('573015550106', 'Isabela Mora'), 'agent', Appointment::CANCELLED, null],
+            [4, '16:00', 'VAL-01', $extra('573015550107', 'Juan Pablo Vélez'), 'agent', Appointment::CONFIRMED, null],
+            [5, '09:30', 'BLA-01', $extra('573015550108', 'Daniela Cano'), 'agent', Appointment::CONFIRMED, null],
+            [8, '10:30', 'VAL-01', $extra('573015550109', 'Simón Ochoa'), 'agent', Appointment::CONFIRMED, null],
+        ];
+
+        foreach ($plan as [$offset, $time, $sku, $person, $source, $status, $notes]) {
+            $item = $service($sku);
+            $start = $monday->addDays($offset)->setTimeFromTimeString($time);
+
+            Appointment::create([
+                'contact_id' => $person->id,
+                'catalog_item_id' => $item->id,
+                'title' => $item->name,
+                'starts_at' => $start->utc(),
+                'ends_at' => $start->addMinutes($item->duration_minutes ?? 30)->utc(),
+                'status' => $status,
+                'source' => $source,
+                'notes' => $notes,
+            ]);
+        }
     }
 
     /**
