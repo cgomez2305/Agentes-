@@ -11,7 +11,18 @@ class Tenant extends Model
 {
     protected $fillable = [
         'name', 'slug', 'vertical', 'plan', 'monthly_conversation_limit',
-        'timezone', 'locale', 'business_hours', 'booking_settings', 'profile',
+        'timezone', 'locale', 'business_hours', 'booking_settings', 'followup_settings', 'profile',
+    ];
+
+    /** Valores por defecto de los seguimientos automáticos. */
+    public const FOLLOWUP_DEFAULTS = [
+        'nudge_enabled' => true,
+        'nudge_after_hours' => 4,
+        'reminder_enabled' => true,
+        'reminder_hours_before' => 24,
+        // Plantilla aprobada en Meta para escribir fuera de la ventana de 24 h.
+        'reminder_template' => null,
+        'template_language' => 'es',
     ];
 
     /** Mismos valores por defecto que la base de datos, para que existan antes de recargar el modelo. */
@@ -37,6 +48,7 @@ class Tenant extends Model
         return [
             'business_hours' => 'array',
             'booking_settings' => 'array',
+            'followup_settings' => 'array',
             'profile' => 'array',
             'monthly_conversation_limit' => 'integer',
         ];
@@ -68,6 +80,11 @@ class Tenant extends Model
     public function booking(string $key): mixed
     {
         return ($this->booking_settings ?? [])[$key] ?? self::BOOKING_DEFAULTS[$key];
+    }
+
+    public function followup(string $key): mixed
+    {
+        return ($this->followup_settings ?? [])[$key] ?? self::FOLLOWUP_DEFAULTS[$key];
     }
 
     public function users(): HasMany

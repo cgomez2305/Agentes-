@@ -21,6 +21,7 @@ return [
         ],
     ],
     'booking_settings' => ['enabled' => false],
+    'followup_settings' => ['nudge_enabled' => true, 'nudge_after_hours' => 4, 'reminder_enabled' => false, 'reminder_hours_before' => 24, 'reminder_template' => null],
     'business_hours' => [
         'mon' => ['09:00', '19:00'], 'tue' => ['09:00', '19:00'], 'wed' => ['09:00', '19:00'],
         'thu' => ['09:00', '19:00'], 'fri' => ['09:00', '19:00'], 'sat' => ['09:00', '14:00'],

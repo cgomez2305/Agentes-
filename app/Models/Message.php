@@ -67,6 +67,8 @@ class Message extends Model
             $this->direction === self::IN => 'Cliente',
             $this->author === 'human' => $this->user?->name ?? 'Equipo',
             $this->source === 'llm' => 'Agente IA',
+            $this->source === 'followup' => 'Seguimiento automático',
+            $this->source === 'reminder' => 'Recordatorio de cita',
             default => 'Respuesta automática',
         };
     }

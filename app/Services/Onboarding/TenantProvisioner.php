@@ -46,6 +46,7 @@ class TenantProvisioner
                 'vertical' => $vertical,
                 'business_hours' => $template['business_hours'] ?? null,
                 'booking_settings' => $template['booking_settings'] ?? null,
+                'followup_settings' => $template['followup_settings'] ?? null,
                 'profile' => $profile,
             ]);
 

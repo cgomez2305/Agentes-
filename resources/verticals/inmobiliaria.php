@@ -22,6 +22,7 @@ return [
         ],
     ],
     'booking_settings' => ['enabled' => true, 'slot_minutes' => 60, 'default_duration' => 60, 'min_notice_hours' => 4, 'max_days_ahead' => 21, 'capacity' => 1],
+    'followup_settings' => ['nudge_enabled' => true, 'nudge_after_hours' => 4, 'reminder_enabled' => true, 'reminder_hours_before' => 24, 'reminder_template' => 'recordatorio_visita'],
     'business_hours' => [
         'mon' => ['08:00', '18:00'], 'tue' => ['08:00', '18:00'], 'wed' => ['08:00', '18:00'],
         'thu' => ['08:00', '18:00'], 'fri' => ['08:00', '18:00'], 'sat' => ['09:00', '16:00'], 'sun' => ['10:00', '15:00'],

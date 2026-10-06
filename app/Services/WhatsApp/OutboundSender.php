@@ -97,7 +97,7 @@ class OutboundSender
             $message->update(['status' => 'sent', 'wa_message_id' => $waId ?: null]);
         } catch (\Throwable $e) {
             report($e);
-            $message->update(['status' => 'failed', 'meta' => [...($message->meta ?? []), 'error' => $e->getMessage()]]);
+            $message->refresh()->update(['status' => 'failed', 'meta' => [...($message->meta ?? []), 'error' => $e->getMessage()]]);
         }
 
         return $message;

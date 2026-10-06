@@ -176,7 +176,8 @@ body.app { display: grid; grid-template-rows: var(--topbar-h) minmax(0, 1fr); he
 .bubble-meta { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 3px; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .bubble-meta .author { margin-right: auto; padding-right: 12px; font: 500 10px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; }
 .author.src-llm { color: var(--ai); }
-.author.src-rule { color: var(--accent); }
+.author.src-rule, .author.src-reminder { color: var(--accent); }
+.author.src-followup { color: var(--ai); }
 .author.src-human { color: var(--human); }
 .ticks { color: var(--muted); letter-spacing: -3px; padding-right: 3px; }
 .ticks.read { color: var(--check); }
