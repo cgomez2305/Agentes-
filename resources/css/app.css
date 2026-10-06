@@ -411,7 +411,8 @@ body.app { display: grid; grid-template-rows: var(--topbar-h) minmax(0, 1fr); he
 .test-chat .thread { border-radius: 12px; background-color: var(--sunken); padding: 14px 12px; }
 .test-chat .bubble { max-width: 88%; }
 .bubble.is-draft { outline: 1.5px dashed var(--ai); }
-.test-empty { margin: auto; text-align: center; color: var(--muted); font-size: 13.5px; max-width: 26ch; }
+.test-empty { margin: auto; display: grid; justify-items: center; gap: 6px; text-align: center; color: var(--muted); font-size: 13.5px; }
+.test-empty p { margin: 0; }
 .test-chat .typing { align-self: flex-end; background: var(--bubble-out); border-radius: 12px; padding: 10px 14px; gap: 4px; }
 .test-chat .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1.1s infinite; }
 .test-chat .typing span:nth-child(2) { animation-delay: .15s; } .test-chat .typing span:nth-child(3) { animation-delay: .3s; }
@@ -461,6 +462,26 @@ body.app { display: grid; grid-template-rows: var(--topbar-h) minmax(0, 1fr); he
     .choice-grid, .catalog-form { grid-template-columns: minmax(0, 1fr); }
     .day-toggle { width: auto; min-width: 110px; }
 }
+
+/* Primeros pasos */
+.onboarding { display: grid; gap: 12px; padding: 18px 20px; border-radius: 16px; background: var(--panel); border: 1px solid var(--accent); }
+.onboarding header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.onboarding h2 { margin: 0; font: 700 20px var(--f-display); letter-spacing: -.01em; }
+.onboarding header p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.onboarding-count { color: var(--muted); font-size: 13px; white-space: nowrap; }
+.onboarding-count b { font: 700 22px var(--f-display); color: var(--accent); }
+.onboarding-bar { height: 6px; border-radius: 999px; background: var(--accent-soft); overflow: hidden; }
+.onboarding-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.steps li { display: flex; gap: 10px; align-items: flex-start; padding: 10px; border-radius: 12px; background: var(--bg); }
+.step-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: none; color: var(--accent-ink); }
+.steps li.done .step-check { background: var(--accent); border-color: var(--accent); }
+.step-body { display: grid; gap: 1px; min-width: 0; }
+.step-body strong { font-size: 14px; font-weight: 600; }
+.step-body a { color: var(--ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.step-body small { color: var(--muted); font-size: 12.5px; }
+.steps li.done strong { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+@media (max-width: 900px) { .steps { grid-template-columns: minmax(0, 1fr); } }
 
 /* Contactos */
 .pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
@@ -543,6 +564,20 @@ body.auth { min-height: 100dvh; display: grid; place-items: center; padding-inli
 .form .check { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--muted); }
 .form .btn { justify-content: center; padding-block: 10px; margin-top: 12px; }
 .form-error { margin: 4px 0 0; color: var(--danger); font-size: 13.5px; }
+.auth-card.wide { width: min(620px, 100%); }
+.auth-card .form input[type="text"] { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); }
+.auth-switch { margin: 6px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
+.auth-switch a { color: var(--accent); font-weight: 600; }
+.optional { font-weight: 400; color: var(--muted); }
+.vertical-picker { border: 0; padding: 0; margin: 0 0 6px; display: grid; gap: 8px; }
+.vertical-picker legend { font-size: 13px; font-weight: 600; margin-bottom: 8px; padding: 0; }
+.vertical-option { display: flex !important; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; margin: 0 !important; font-weight: 400 !important; }
+.vertical-option input { accent-color: var(--accent); margin-top: 3px; }
+.vertical-option span { display: grid; gap: 2px; }
+.vertical-option small { color: var(--muted); font-size: 13px; }
+.vertical-option:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.form .check { align-items: flex-start !important; font-size: 13.5px; }
+.form .check input { margin-top: 3px; accent-color: var(--accent); }
 
 /* Responsive */
 @media (max-width: 1180px) {

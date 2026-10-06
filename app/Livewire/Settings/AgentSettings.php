@@ -4,8 +4,11 @@ namespace App\Livewire\Settings;
 
 use App\Livewire\Concerns\ScopedToTenant;
 use App\Models\Agent;
+use App\Models\CatalogItem;
+use App\Models\Channel;
 use App\Models\Contact;
 use App\Models\Conversation;
+use App\Models\KnowledgeSource;
 use App\Models\Message;
 use App\Services\Agent\AgentRuntime;
 use Illuminate\Support\Collection;
@@ -19,6 +22,13 @@ use Livewire\Component;
 class AgentSettings extends Component
 {
     use ScopedToTenant;
+
+    /** Mensajes sugeridos para el chat de prueba, según el tipo de negocio. */
+    public const TEST_PROMPTS = [
+        'clinica' => ['¿Cuánto vale una limpieza?', 'Quiero agendar para el jueves'],
+        'inmobiliaria' => ['¿Tienen apartamentos para invertir?', 'Quiero visitar la sala de ventas el sábado'],
+        'tienda' => ['¿Hacen envíos a Cali?', '¿Qué me recomiendas para regalar?'],
+    ];
 
     public string $name = '';
 
@@ -178,9 +188,33 @@ class AgentSettings extends Component
         return $this->testConversation()->messages()->orderBy('id')->get();
     }
 
+    /**
+     * Guía de primeros pasos: se oculta cuando todo está listo.
+     *
+     * @return list<array{label: string, hint: string, done: bool, route: ?string}>
+     */
+    #[Computed]
+    public function onboarding(): array
+    {
+        $tenant = $this->tenant()->fresh();
+        $agent = $this->agent();
+
+        return [
+            ['label' => 'Revisa las instrucciones del agente', 'hint' => 'Ajusta el tono y lo que debe lograr en esta página.', 'done' => $agent->updated_at->gt($agent->created_at->addSecond()), 'route' => null],
+            ['label' => 'Completa dirección y horario', 'hint' => 'El agente los usa para responder y para agendar.', 'done' => filled(($tenant->profile ?? [])['direccion'] ?? null) && filled($tenant->business_hours), 'route' => 'settings.business'],
+            ['label' => 'Agrega tu catálogo con precios', 'hint' => 'Sin catálogo, el agente no da precios.', 'done' => CatalogItem::exists(), 'route' => 'settings.knowledge'],
+            ['label' => 'Carga información del negocio', 'hint' => 'Preguntas frecuentes, políticas, formas de pago.', 'done' => KnowledgeSource::exists(), 'route' => 'settings.knowledge'],
+            ['label' => 'Prueba el agente', 'hint' => 'Usa el chat de la derecha como si fueras un cliente.', 'done' => $this->testMessages->isNotEmpty(), 'route' => null],
+            ['label' => 'Conecta tu WhatsApp', 'hint' => 'Mientras se habilita la conexión automática, nuestro equipo conecta tu número con la API oficial de Meta.', 'done' => Channel::exists(), 'route' => null],
+        ];
+    }
+
     public function render()
     {
-        return view('livewire.settings.agent');
+        return view('livewire.settings.agent', [
+            'welcome' => session('welcome', false),
+            'prompts' => self::TEST_PROMPTS[$this->tenant()->vertical] ?? self::TEST_PROMPTS['clinica'],
+        ]);
     }
 
     private function agent(): Agent

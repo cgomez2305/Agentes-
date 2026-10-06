@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Calendar\GoogleCalendarController;
 use App\Http\Middleware\SetTenantFromUser;
 use App\Livewire\Agenda;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/ingresar', [LoginController::class, 'show'])->name('login');
     Route::post('/ingresar', [LoginController::class, 'store']);
+    Route::get('/registro', [RegisterController::class, 'show'])->name('register');
+    Route::post('/registro', [RegisterController::class, 'store'])->middleware('throttle:5,1');
 });
 
 Route::middleware(['auth', SetTenantFromUser::class])->group(function () {

@@ -7,6 +7,38 @@
     </header>
     @include('livewire.settings._nav')
 
+    @php
+        $steps = $this->onboarding;
+        $doneCount = collect($steps)->where('done', true)->count();
+    @endphp
+    @if ($doneCount < count($steps))
+        <section class="onboarding" aria-labelledby="onboarding-title">
+            <header>
+                <div>
+                    <h2 id="onboarding-title">{{ $welcome ? '¡Tu agente está creado!' : 'Primeros pasos' }}</h2>
+                    <p>{{ $welcome ? 'Ya responde con la plantilla de tu tipo de negocio. Complétalo para que hable como tú.' : 'Completa estos pasos para que tu agente quede listo.' }}</p>
+                </div>
+                <span class="onboarding-count"><b>{{ $doneCount }}</b> de {{ count($steps) }}</span>
+            </header>
+            <div class="onboarding-bar" role="progressbar" aria-valuemin="0" aria-valuemax="{{ count($steps) }}" aria-valuenow="{{ $doneCount }}"><span style="width: {{ $doneCount / count($steps) * 100 }}%"></span></div>
+            <ol class="steps">
+                @foreach ($steps as $step)
+                    <li @class(['done' => $step['done']])>
+                        <span class="step-check" aria-hidden="true">{{ $step['done'] ? '✓' : '' }}</span>
+                        <span class="step-body">
+                            @if ($step['route'] && ! $step['done'])
+                                <a href="{{ route($step['route']) }}"><strong>{{ $step['label'] }}</strong></a>
+                            @else
+                                <strong>{{ $step['label'] }}</strong>
+                            @endif
+                            <small>{{ $step['done'] ? 'Listo' : $step['hint'] }}</small>
+                        </span>
+                    </li>
+                @endforeach
+            </ol>
+        </section>
+    @endif
+
     <div class="settings-split">
         <form class="settings-form" wire:submit="save">
             @if ($notice)
@@ -154,7 +186,12 @@
                         @endif
                     </div>
                 @empty
-                    <p class="test-empty">Prueba con: “¿Cuánto vale una limpieza?” o “Quiero agendar para el jueves”.</p>
+                    <div class="test-empty">
+                        <p>Prueba con:</p>
+                        @foreach ($prompts as $prompt)
+                            <button type="button" class="mini" wire:click="$set('testMessage', @js($prompt))">{{ $prompt }}</button>
+                        @endforeach
+                    </div>
                 @endforelse
                 <div class="typing" wire:loading.flex wire:target="sendTest"><span></span><span></span><span></span></div>
             </div>

@@ -30,6 +30,7 @@
             <label class="check"><input type="checkbox" name="remember" id="remember"> Mantener la sesión abierta</label>
 
             <button type="submit" class="btn primary">Ingresar</button>
+            <p class="auth-switch">¿Aún no tienes cuenta? <a href="{{ route('register') }}">Crea tu agente</a></p>
         </form>
     </main>
 </body>
