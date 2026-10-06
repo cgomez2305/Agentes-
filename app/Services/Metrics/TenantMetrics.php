@@ -63,7 +63,7 @@ class TenantMetrics
         ];
         $cost = (float) $replies->sum('cost');
 
-        $appointments = Appointment::query()->whereBetween('created_at', [$fromUtc, $toUtc])->get(['source', 'status']);
+        $appointments = Appointment::query()->whereHas('contact', $real)->whereBetween('created_at', [$fromUtc, $toUtc])->get(['source', 'status']);
         $newContacts = Contact::query()->where('is_test', false)->whereBetween('created_at', [$fromUtc, $toUtc])->get(['stage']);
 
         $month = UsageRecord::forTenant($tenant->id, CarbonImmutable::now($tenant->timezone)->format('Y-m'));

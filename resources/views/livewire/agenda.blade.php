@@ -76,6 +76,9 @@
                             @endif
                             <div class="appt-foot">
                                 <span class="appt-source">{{ $appointment->source === 'agent' ? 'Agente' : 'Equipo' }}</span>
+                                @if ($appointment->contact->is_test)
+                                    <span class="appt-test" title="Creada desde el chat de prueba de la configuración">Prueba</span>
+                                @endif
                                 @if ($appointment->status !== Appointment::CONFIRMED)
                                     <span class="appt-status">{{ Appointment::STATUS_LABELS[$appointment->status] }}</span>
                                 @endif

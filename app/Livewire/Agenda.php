@@ -193,7 +193,7 @@ class Agenda extends Component
     #[Computed]
     public function weekStats(): array
     {
-        $all = $this->days->flatMap(fn ($day) => $day['appointments']);
+        $all = $this->days->flatMap(fn ($day) => $day['appointments'])->reject(fn ($a) => $a->contact->is_test);
 
         return [
             'total' => $all->where('status', '!=', Appointment::CANCELLED)->count(),
