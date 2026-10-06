@@ -41,6 +41,9 @@ return [
     // Máximo de vueltas de herramientas por turno (evita bucles).
     'max_tool_rounds' => (int) env('AGENTES_MAX_TOOL_ROUNDS', 5),
 
+    // Cuando quedan por fuera del contexto al menos estos mensajes, se resumen.
+    'summary_batch' => (int) env('AGENTES_SUMMARY_BATCH', 6),
+
     /*
     |--------------------------------------------------------------------------
     | LLM

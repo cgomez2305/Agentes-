@@ -18,8 +18,8 @@ class Conversation extends Model
     public const STATUS_CLOSED = 'closed';
 
     protected $fillable = [
-        'tenant_id', 'contact_id', 'channel_id', 'agent_id', 'status', 'summary',
-        'handoff_reason', 'last_inbound_at', 'window_expires_at',
+        'tenant_id', 'contact_id', 'channel_id', 'agent_id', 'assigned_user_id', 'status', 'summary',
+        'summarized_until_message_id', 'handoff_reason', 'last_inbound_at', 'window_expires_at', 'last_message_at',
     ];
 
     protected function casts(): array
@@ -27,6 +27,7 @@ class Conversation extends Model
         return [
             'last_inbound_at' => 'datetime',
             'window_expires_at' => 'datetime',
+            'last_message_at' => 'datetime',
         ];
     }
 
@@ -45,6 +46,11 @@ class Conversation extends Model
         return $this->belongsTo(Agent::class);
     }
 
+    public function assignee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
+    }
+
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
@@ -55,8 +61,17 @@ class Conversation extends Model
         return $this->window_expires_at !== null && $this->window_expires_at->isFuture();
     }
 
-    public function handToHuman(string $reason): void
+    public function handToHuman(string $reason, ?User $user = null): void
     {
-        $this->update(['status' => self::STATUS_HUMAN, 'handoff_reason' => $reason]);
+        $this->update([
+            'status' => self::STATUS_HUMAN,
+            'handoff_reason' => $reason,
+            'assigned_user_id' => $user?->id ?? $this->assigned_user_id,
+        ]);
+    }
+
+    public function returnToBot(): void
+    {
+        $this->update(['status' => self::STATUS_BOT, 'handoff_reason' => null, 'assigned_user_id' => null]);
     }
 }

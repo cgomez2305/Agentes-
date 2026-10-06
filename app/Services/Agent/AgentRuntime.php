@@ -107,14 +107,14 @@ class AgentRuntime
             maxToolRounds: config('agentes.max_tool_rounds'),
         ), $tools->execute(...));
 
-        $this->recordUsage($conversation, $result);
+        UsageRecord::recordLlm($conversation->tenant_id, $result);
 
         $check = $this->guard->check($result->text, $tools->evidence()."\n".$context);
         $meta = ['tool_calls' => $result->toolCalls, 'stop_reason' => $result->stopReason];
 
         if (! $check['ok'] || $result->refused()) {
             // Ante una respuesta dudosa es más seguro pasar a un humano que improvisar.
-            $conversation->handToHuman('Validación de salida: '.($check['issue'] ?? 'rechazo del modelo'));
+            $conversation->handToHuman($this->describeIssue($check['issue'] ?? null));
             $message = $this->storeReply($conversation, $agent, $agent->handoffMessage(), 'rule', $result, $meta + [
                 'blocked_text' => $check['text'],
                 'issue' => $check['issue'] ?? 'refusal',
@@ -141,7 +141,8 @@ class AgentRuntime
     {
         return $conversation->messages()
             ->whereNotNull('content')
-            ->where(fn ($q) => $q->whereNull('status')->orWhere('status', '!=', 'draft'))
+            ->where(fn ($q) => $q->whereNull('status')->orWhereNotIn('status', Message::UNSENT_STATUSES))
+            ->when($conversation->summarized_until_message_id, fn ($q, $id) => $q->where('id', '>', $id))
             ->latest('id')
             ->limit(config('agentes.context_messages'))
             ->get()
@@ -175,17 +176,16 @@ class AgentRuntime
         ]);
     }
 
-    private function recordUsage(Conversation $conversation, LlmResult $result): void
+    /**
+     * Motivo del traspaso en palabras del negocio, para la bandeja.
+     */
+    private function describeIssue(?string $issue): string
     {
-        $input = $result->inputTokens + $result->cacheReadTokens + $result->cacheWriteTokens;
-
-        $record = UsageRecord::forTenant($conversation->tenant_id);
-
-        UsageRecord::withoutGlobalScopes()->whereKey($record->id)->incrementEach([
-            'llm_calls' => $result->calls,
-            'input_tokens' => $input,
-            'output_tokens' => $result->outputTokens,
-            'cost_usd' => round($result->costUsd(), 6),
-        ]);
+        return match (true) {
+            $issue === null => 'El agente no pudo responder este mensaje.',
+            str_starts_with($issue, 'precio_no_verificado:') => 'El agente mencionó un precio que no está en el catálogo ($'.substr($issue, 21).').',
+            $issue === 'respuesta_vacia' => 'El agente no generó una respuesta.',
+            default => 'La respuesta del agente no pasó la validación.',
+        };
     }
 }

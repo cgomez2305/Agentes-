@@ -11,7 +11,7 @@ use App\Models\Message;
 use App\Models\Tenant;
 use App\Services\Agent\AgentRuntime;
 use App\Services\Onboarding\TenantProvisioner;
-use App\Services\WhatsApp\WhatsAppClient;
+use App\Services\WhatsApp\OutboundSender;
 use App\Support\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -63,10 +63,10 @@ class AgentRuntimeTest extends TestCase
         $second = $this->inbound($conversation, 'Quería preguntar por el blanqueamiento');
 
         // El job del primer mensaje ve que llegó otro después y no hace nada.
-        (new RespondToConversation($conversation->id, $first->id))->handle(app(AgentRuntime::class), app(WhatsAppClient::class), app(TenantContext::class));
+        (new RespondToConversation($conversation->id, $first->id))->handle(app(AgentRuntime::class), app(OutboundSender::class), app(TenantContext::class));
         $this->assertCount(0, $this->llm->requests);
 
-        (new RespondToConversation($conversation->id, $second->id))->handle(app(AgentRuntime::class), app(WhatsAppClient::class), app(TenantContext::class));
+        (new RespondToConversation($conversation->id, $second->id))->handle(app(AgentRuntime::class), app(OutboundSender::class), app(TenantContext::class));
         $this->assertCount(1, $this->llm->requests);
 
         $lastTurn = collect($this->llm->requests[0]->messages)->last();

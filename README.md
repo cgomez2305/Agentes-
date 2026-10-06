@@ -3,7 +3,7 @@
 SaaS multi-tenant para que una pyme tenga un agente de IA que responde, califica y pasa a un humano por WhatsApp.
 El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 
-**Estado:** Fase 0 (validación). El núcleo del agente funciona de punta a punta: entra un mensaje por el webhook de Meta, el agente responde con herramientas y la respuesta sale por la Cloud API. Todavía no hay panel web.
+**Estado:** Fase 1 (núcleo) completa. El agente responde de punta a punta por WhatsApp y el equipo del negocio atiende desde una bandeja web: toma conversaciones, responde, aprueba borradores y devuelve el control al bot.
 
 ## Qué hay construido
 
@@ -20,6 +20,10 @@ El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 | Plantillas por vertical | `resources/verticals/` | `clinica`, `inmobiliaria`, `tienda` |
 | Modo "sugerir" | `agents.mode = sugerir` | La respuesta queda como borrador y no se envía |
 | Medición de costo | `usage_records`, columnas de costo en `messages` | Tokens y USD por mensaje y por tenant al mes |
+| Bandeja web | `app/Livewire/Inbox.php`, `resources/views/livewire/inbox.blade.php` | Filtro "Necesitan atención", tomar/devolver al bot, responder, aprobar o editar borradores, ficha del cliente, actualización cada 5 s |
+| Envío saliente | `app/Services/WhatsApp/OutboundSender.php` | Respeta la ventana de 24 h; una persona que responde toma la conversación |
+| Resumen automático | `app/Services/Agent/ConversationSummarizer.php` | Los mensajes que salen del contexto corto se resumen fuera del camino crítico |
+| Acceso | `app/Http/Controllers/Auth/LoginController.php` | Cada usuario ve solo las conversaciones de su negocio |
 
 ### Cómo se abarata la operación (ya implementado)
 
@@ -40,18 +44,34 @@ El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 
 ```bash
 composer install
+npm install && npm run build
 cp .env.example .env
 php artisan key:generate
 touch database/database.sqlite
 php artisan migrate
+```
+
+### Ver la bandeja con datos de demostración
+
+```bash
+php artisan db:seed            # crea la Clínica Dental Sonrisa con 5 conversaciones de ejemplo
+php artisan serve
+```
+
+Entra a `http://localhost:8000` con `demo@agentes.test` / `demo12345`. La demo no tiene un número de WhatsApp conectado, así que los mensajes que envíes desde la bandeja quedan guardados con el aviso "No enviado".
+
+### Crear un negocio propio
+
+```bash
 
 # Negocio de ejemplo con datos de prueba
-php artisan agentes:negocio "Clínica Dental Sonrisa" --vertical=clinica --direccion="Calle 10 # 43-20, Medellín"
-php artisan agentes:conocimiento clinica-dental-sonrisa ejemplos/clinica-conocimiento.md
-php artisan agentes:catalogo clinica-dental-sonrisa ejemplos/clinica-catalogo.csv
+php artisan agentes:negocio "Mi Clínica" --vertical=clinica --direccion="Calle 10 # 43-20, Medellín"
+php artisan agentes:conocimiento mi-clinica ejemplos/clinica-conocimiento.md
+php artisan agentes:catalogo mi-clinica ejemplos/clinica-catalogo.csv
+php artisan agentes:usuario mi-clinica tu@correo.com --nombre="Tu Nombre"
 
 # Conversar con el agente desde la terminal (requiere ANTHROPIC_API_KEY en .env)
-php artisan agentes:chat clinica-dental-sonrisa
+php artisan agentes:chat mi-clinica
 ```
 
 El simulador muestra, por cada respuesta, de dónde salió (regla o LLM), los tokens y el costo en USD.
@@ -78,16 +98,16 @@ Para probar en local, expón el puerto con un túnel (ngrok, Cloudflare Tunnel).
 php artisan test
 ```
 
-Cubren: verificación y firma del webhook, flujo de punta a punta con envío a la Graph API, duplicados de Meta, debounce, reglas sin LLM, traspaso a humano, bloqueo de precios inventados, calificación del lead, recuperación de conocimiento, modo sugerir, aislamiento entre negocios y el formato de las peticiones a la API de Claude (bucle de herramientas, caché, fallback).
+Cubren: ingreso y aislamiento de la bandeja por negocio, filtro de atención, respuesta humana, ventana de 24 h, borradores, resumen automático, verificación y firma del webhook, flujo de punta a punta con envío a la Graph API, duplicados de Meta, debounce, reglas sin LLM, traspaso a humano, bloqueo de precios inventados, calificación del lead, recuperación de conocimiento, modo sugerir, aislamiento entre negocios y el formato de las peticiones a la API de Claude (bucle de herramientas, caché, fallback).
 
-## Siguientes pasos (Fase 1)
+## Siguientes pasos (Fase 2: producto vendible)
 
-1. Bandeja web para que un humano tome conversaciones, apruebe borradores y devuelva el control al bot.
-2. Resumen automático de la conversación cuando el historial supera el contexto corto.
-3. Embeddings + pgvector detrás de `KnowledgeSearch`, y caché semántica de preguntas frecuentes.
-4. Agenda con Google Calendar (`consultar_disponibilidad`, `crear_cita`).
-5. Seguimientos dentro de la ventana de 24 h y con plantillas fuera de ella.
-6. Onboarding web (registro, datos del negocio, carga de PDF/URL).
+1. Agenda con Google Calendar (`consultar_disponibilidad`, `crear_cita`).
+2. Seguimientos automáticos dentro de la ventana de 24 h y con plantillas aprobadas fuera de ella.
+3. Onboarding web: registro, datos del negocio, carga de PDF/URL y catálogo sin consola.
+4. Panel de métricas: conversaciones, leads calificados, citas, tiempo de respuesta y costo.
+5. CRM: lista de contactos con etapas y etiquetas.
+6. Cobro de suscripciones (Wompi y Stripe) y límites por plan.
 
 ## Decisiones pendientes
 
