@@ -68,7 +68,7 @@ class FollowUpService
             ->whereNotNull('channel_id')
             // Que quede al menos 1 hora de ventana para que el cliente alcance a responder gratis.
             ->where('window_expires_at', '>', now()->addHour())
-            ->whereHas('contact', fn ($q) => $q->where('opted_out', false))
+            ->whereHas('contact', fn ($q) => $q->where('opted_out', false)->where('is_test', false))
             ->get();
 
         foreach ($candidates as $conversation) {

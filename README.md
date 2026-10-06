@@ -26,6 +26,7 @@ El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 | Acceso | `app/Http/Controllers/Auth/LoginController.php` | Cada usuario ve solo las conversaciones de su negocio |
 | Métricas | `app/Services/Metrics/TenantMetrics.php`, `app/Livewire/Metrics.php` | Conversaciones, % resueltas sin persona, primera respuesta, citas del agente, costo de IA, embudo, uso del plan y gráfica diaria con vista de tabla |
 | Seguimientos | `app/Services/FollowUp/FollowUpService.php`, `php artisan agentes:seguimientos` | Un mensaje a quien dejó de responder (dentro de la ventana de 24 h, de 8 a. m. a 8 p. m.) y recordatorio de cita el día anterior, con plantilla aprobada si la ventana está cerrada |
+| Configuración web | `app/Livewire/Settings/` | Agente (instrucciones, tono, modo, modelo, datos a pedir, respuestas rápidas), negocio (datos y horario), conocimiento y catálogo (con importación CSV) y seguimientos; incluye un chat de prueba que no aparece en la bandeja ni en las métricas |
 | Agenda | `app/Services/Booking/`, `app/Services/Agent/BookingTools.php`, `app/Livewire/Agenda.php` | El agente consulta horarios libres, agenda y cancela; vista semanal, citas manuales, reglas por negocio y sincronización opcional con Google Calendar |
 
 ### Cómo se abarata la operación (ya implementado)
@@ -127,13 +128,15 @@ Corren cada 5 minutos con el programador de Laravel. En el servidor agrega el cr
 - **Cliente sin respuesta:** si el agente IA hizo la última pregunta y el cliente no contestó en 4 horas (configurable), se le escribe una sola vez, siempre que falte al menos 1 hora para que cierre la ventana de 24 h. No se escribe de 8 p. m. a 8 a. m.
 - **Recordatorio de cita:** 24 horas antes. Si la ventana está abierta va como texto normal (gratis); si está cerrada se usa la plantilla `recordatorio_cita`, que cada negocio debe crear y aprobar en Meta con tres variables: `{{1}}` nombre, `{{2}}` servicio, `{{3}}` fecha y hora. Sin plantilla aprobada, el recordatorio se omite y queda registrado.
 
-## Siguientes pasos (Fase 2: producto vendible)
+## Siguientes pasos
 
-1. Seguimientos automáticos dentro de la ventana de 24 h y con plantillas aprobadas fuera de ella.
-3. Onboarding web: registro, datos del negocio, carga de PDF/URL y catálogo sin consola.
-4. Panel de métricas: conversaciones, leads calificados, citas, tiempo de respuesta y costo.
-5. CRM: lista de contactos con etapas y etiquetas.
-6. Cobro de suscripciones (Wompi y Stripe) y límites por plan.
+Fase 2 (producto vendible), lo que falta:
+
+1. Registro de negocios desde la web (hoy se crean con `php artisan agentes:negocio`) y carga de conocimiento desde PDF o URL.
+2. CRM: lista de contactos con etapas, etiquetas y filtros.
+3. Cobro de suscripciones (Wompi y Stripe) y límites por plan.
+
+Fase 3 (diferenciadores): plugin de WooCommerce, links de pago (Wompi/Bold), Embedded Signup de Meta y búsqueda semántica con pgvector.
 
 ## Decisiones pendientes
 

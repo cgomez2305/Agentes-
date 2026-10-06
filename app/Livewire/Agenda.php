@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\ScopedToTenant;
 use App\Models\Appointment;
 use App\Models\CatalogItem;
 use App\Models\Contact;
@@ -21,6 +22,8 @@ use Livewire\Component;
 #[Title('Agenda')]
 class Agenda extends Component
 {
+    use ScopedToTenant;
+
     /** Lunes de la semana visible, AAAA-MM-DD. */
     #[Url(as: 'semana')]
     public string $week = '';
@@ -40,13 +43,6 @@ class Agenda extends Component
     public ?string $notice = null;
 
     public ?string $error = null;
-
-    public function boot(TenantContext $tenants): void
-    {
-        $tenant = Auth::user()?->tenant;
-        abort_unless($tenant, 403);
-        $tenants->set($tenant);
-    }
 
     public function mount(): void
     {
@@ -220,7 +216,7 @@ class Agenda extends Component
         ]);
     }
 
-    private function tenant(): Tenant
+    protected function tenant(): Tenant
     {
         return app(TenantContext::class)->get()->fresh();
     }

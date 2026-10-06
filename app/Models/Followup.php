@@ -18,6 +18,11 @@ class Followup extends Model
         'tenant_id', 'contact_id', 'conversation_id', 'appointment_id', 'message_id', 'kind', 'anchor', 'status', 'reason',
     ];
 
+    public function conversation(): BelongsTo
+    {
+        return $this->belongsTo(Conversation::class);
+    }
+
     public function message(): BelongsTo
     {
         return $this->belongsTo(Message::class);

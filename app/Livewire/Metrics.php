@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\ScopedToTenant;
 use App\Services\Metrics\TenantMetrics;
-use App\Support\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -14,19 +14,14 @@ use Livewire\Component;
 #[Title('Métricas')]
 class Metrics extends Component
 {
+    use ScopedToTenant;
+
     public const PERIODS = [7 => '7 días', 30 => '30 días', 90 => '90 días'];
 
     #[Url(as: 'dias')]
     public int $days = 30;
 
     public bool $showTable = false;
-
-    public function boot(TenantContext $tenants): void
-    {
-        $tenant = Auth::user()?->tenant;
-        abort_unless($tenant, 403);
-        $tenants->set($tenant);
-    }
 
     public function mount(): void
     {

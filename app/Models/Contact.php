@@ -10,7 +10,7 @@ class Contact extends Model
 {
     use BelongsToTenant;
 
-    protected $fillable = ['tenant_id', 'wa_id', 'name', 'stage', 'tags', 'lead_data', 'opted_out'];
+    protected $fillable = ['tenant_id', 'wa_id', 'name', 'stage', 'tags', 'lead_data', 'opted_out', 'is_test'];
 
     protected function casts(): array
     {
@@ -18,6 +18,7 @@ class Contact extends Model
             'tags' => 'array',
             'lead_data' => 'array',
             'opted_out' => 'boolean',
+            'is_test' => 'boolean',
         ];
     }
 

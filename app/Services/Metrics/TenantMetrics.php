@@ -25,7 +25,10 @@ class TenantMetrics
         $fromUtc = $from->utc();
         $toUtc = $to->utc();
 
+        $real = fn ($q) => $q->where('is_test', false);
+
         $conversations = Conversation::query()
+            ->whereHas('contact', $real)
             ->whereBetween('created_at', [$fromUtc, $toUtc])
             ->get(['id', 'status', 'handoff_reason', 'created_at']);
         $ids = $conversations->pluck('id');
@@ -45,6 +48,7 @@ class TenantMetrics
         $botOnly = $conversations->reject($needsHuman)->count();
 
         $replies = Message::query()
+            ->whereHas('conversation.contact', $real)
             ->where('direction', Message::OUT)
             ->whereBetween('created_at', [$fromUtc, $toUtc])
             ->where(fn ($q) => $q->whereNull('status')->orWhereNotIn('status', Message::UNSENT_STATUSES))
@@ -60,7 +64,7 @@ class TenantMetrics
         $cost = (float) $replies->sum('cost');
 
         $appointments = Appointment::query()->whereBetween('created_at', [$fromUtc, $toUtc])->get(['source', 'status']);
-        $newContacts = Contact::query()->whereBetween('created_at', [$fromUtc, $toUtc])->get(['stage']);
+        $newContacts = Contact::query()->where('is_test', false)->whereBetween('created_at', [$fromUtc, $toUtc])->get(['stage']);
 
         $month = UsageRecord::forTenant($tenant->id, CarbonImmutable::now($tenant->timezone)->format('Y-m'));
 

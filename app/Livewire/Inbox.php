@@ -2,10 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\ScopedToTenant;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Services\WhatsApp\OutboundSender;
-use App\Support\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +18,8 @@ use RuntimeException;
 #[Title('Bandeja')]
 class Inbox extends Component
 {
+    use ScopedToTenant;
+
     public const FILTERS = [
         'atencion' => 'Necesitan atención',
         'todas' => 'Todas',
@@ -43,17 +45,6 @@ class Inbox extends Component
     public ?string $notice = null;
 
     public ?string $error = null;
-
-    /**
-     * Livewire atiende cada acción en una petición propia: el tenant se
-     * fija aquí para que todas las consultas queden aisladas.
-     */
-    public function boot(TenantContext $tenants): void
-    {
-        $tenant = Auth::user()?->tenant;
-        abort_unless($tenant, 403);
-        $tenants->set($tenant);
-    }
 
     public function mount(): void
     {
@@ -197,6 +188,7 @@ class Inbox extends Component
     private function baseQuery(): Builder
     {
         return Conversation::query()
+            ->whereHas('contact', fn ($q) => $q->where('is_test', false))
             ->with(['contact', 'assignee'])
             ->addSelect([
                 'conversations.*',
