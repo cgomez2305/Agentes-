@@ -9,6 +9,7 @@ use App\Models\Contact;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Tenant;
+use App\Models\UsageRecord;
 use App\Models\User;
 use App\Services\Onboarding\TenantProvisioner;
 use App\Support\TenantContext;
@@ -96,6 +97,12 @@ class DemoSeeder extends Seeder
         });
 
         $tenants->run($tenant, fn () => $this->appointments($tenant));
+
+        // Consumo del mes como lo habría registrado el webhook.
+        UsageRecord::forTenant($tenant->id, now($tenant->timezone)->format('Y-m'))->update([
+            'conversations' => 5, 'llm_calls' => 9, 'rule_replies' => 3,
+            'input_tokens' => 21400, 'output_tokens' => 610, 'cost_usd' => 0.0247,
+        ]);
 
         $this->command?->info('Demo lista: entra con demo@agentes.test / demo12345');
     }

@@ -24,6 +24,7 @@ El documento de producto está en [`docs/PROYECTO.md`](docs/PROYECTO.md).
 | Envío saliente | `app/Services/WhatsApp/OutboundSender.php` | Respeta la ventana de 24 h; una persona que responde toma la conversación |
 | Resumen automático | `app/Services/Agent/ConversationSummarizer.php` | Los mensajes que salen del contexto corto se resumen fuera del camino crítico |
 | Acceso | `app/Http/Controllers/Auth/LoginController.php` | Cada usuario ve solo las conversaciones de su negocio |
+| Métricas | `app/Services/Metrics/TenantMetrics.php`, `app/Livewire/Metrics.php` | Conversaciones, % resueltas sin persona, primera respuesta, citas del agente, costo de IA, embudo, uso del plan y gráfica diaria con vista de tabla |
 | Agenda | `app/Services/Booking/`, `app/Services/Agent/BookingTools.php`, `app/Livewire/Agenda.php` | El agente consulta horarios libres, agenda y cancela; vista semanal, citas manuales, reglas por negocio y sincronización opcional con Google Calendar |
 
 ### Cómo se abarata la operación (ya implementado)

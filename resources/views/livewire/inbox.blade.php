@@ -286,7 +286,7 @@
 
             <section class="facts">
                 <h3>Esta conversación</h3>
-                <dl class="metrics">
+                <dl class="conv-metrics">
                     <div><dt>Mensajes</dt><dd>{{ $current->messages->count() }}</dd></div>
                     <div><dt>Respuestas del agente</dt><dd>{{ $botReplies }}</dd></div>
                     <div><dt>Costo de IA</dt><dd>US${{ number_format($cost, 4, ',', '.') }}</dd></div>
